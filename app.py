@@ -12,38 +12,35 @@ app.config['PROCESSED_FOLDER'] = 'processed'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
 
-# CSS STYLE
+# CSS_STYLE (original orange theme with slider styling)
 CSS_STYLE = """
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #fefefe;
+    font-family: Arial, sans-serif;
+    background-color: #fff7f0;
     color: #333;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-}
-.container {
-    max-width: 800px;
-    margin: auto;
     padding: 20px;
+    text-align: center;
 }
 h1 {
     color: #FF5733;
 }
 form {
-    background: #fff;
+    background-color: #fff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-input[type="file"], select {
+input[type="file"], select, input[type="range"] {
     margin: 10px 0;
     padding: 10px;
+    width: 100%;
+    max-width: 300px;
 }
 input[type="submit"] {
-    padding: 10px 20px;
     background-color: #C70039;
     color: white;
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -51,98 +48,77 @@ input[type="submit"] {
 input[type="submit"]:hover {
     background-color: #900C3F;
 }
-.image-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
 img {
-    max-width: 100%;
+    margin: 20px;
+    max-width: 90%;
     height: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin: 10px;
+    border-radius: 10px;
+    border: 2px solid #FF5733;
 }
-a.button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #FF5733;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-a.button:hover {
-    background-color: #C70039;
+.slider-label {
+    margin-top: 10px;
+    font-weight: bold;
 }
 """
 
-# HTML Templates
-
+# INDEX_HTML
 INDEX_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image Enhancer - Histogram Equalization</title>
+    <title>Image Enhancer</title>
     <style>{{ css }}</style>
 </head>
 <body>
-    <div class="container">
-        <h1>📸 Image Enhancer</h1>
-        <form method="post" enctype="multipart/form-data">
-            <p><strong>Select an image to enhance:</strong></p>
-            <input type="file" name="image" required><br>
-            <label for="grayscale">Convert to Grayscale before Equalizing?</label>
-            <select name="grayscale">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-            </select><br>
-            <input type="submit" value="Enhance Image">
-        </form>
-    </div>
+    <h1>🧪 Image Histogram Equalization</h1>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="image" required><br>
+        <label for="grayscale">Convert to Grayscale?</label>
+        <select name="grayscale">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+        </select><br>
+        <div class="slider-label">Intensity:</div>
+        <input type="range" min="1" max="100" value="100" name="intensity" id="intensitySlider">
+        <div id="intensityValue">100%</div>
+        <script>
+            const slider = document.getElementById('intensitySlider');
+            const output = document.getElementById('intensityValue');
+            slider.oninput = function() {
+                output.innerHTML = this.value + '%';
+            }
+        </script>
+        <br><br>
+        <input type="submit" value="Enhance">
+    </form>
 </body>
 </html>
 """
 
+# RESULT_HTML
 RESULT_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Enhanced Image</title>
+    <title>Result</title>
     <style>{{ css }}</style>
 </head>
 <body>
-    <div class="container">
-        <h1>✨ Enhancement Complete!</h1>
-        <div class="image-container">
-            <div>
-                <h3>Original Image</h3>
-                <img src="{{ url_for('uploaded_file', filename=filename) }}">
-            </div>
-            <div>
-                <h3>Enhanced Image</h3>
-                <img src="{{ url_for('processed_file', filename=filename) }}">
-            </div>
-        </div>
-        <a class="button" href="{{ url_for('download_file', filename=filename) }}">⬇️ Download Enhanced Image</a>
-        <br><br>
-        <a class="button" href="{{ url_for('index') }}">🔄 Enhance Another</a>
-    </div>
+    <h1>✅ Result</h1>
+    <h3>Original Image</h3>
+    <img src="{{ url_for('uploaded_file', filename=filename) }}">
+    <h3>Enhanced Image</h3>
+    <img src="{{ url_for('processed_file', filename=filename) }}">
+    <br><br>
+    <a href="{{ url_for('download_file', filename=filename) }}">Download Image</a>
+    <br><br>
+    <a href="{{ url_for('index') }}">🔙 Back</a>
 </body>
 </html>
 """
 
-# IMAGE PROCESSING FUNCTION
-def equalize_histogram(input_path, output_path, grayscale=False):
-    """
-    Apply histogram equalization to the image
-
-    Parameters:
-    - input_path: Path to the input image
-    - output_path: Path to save the processed image
-    - grayscale: Whether to convert to grayscale before equalization
-    """
+# IMAGE PROCESSING (Histogram Equalization with Intensity Control)
+def equalize_histogram(input_path, output_path, grayscale=False, intensity=1.0):
     try:
         image = cv2.imread(input_path)
 
@@ -157,7 +133,8 @@ def equalize_histogram(input_path, output_path, grayscale=False):
             ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
             y, cr, cb = cv2.split(ycrcb)
             y_eq = cv2.equalizeHist(y)
-            ycrcb_eq = cv2.merge((y_eq, cr, cb))
+            y_blend = cv2.addWeighted(y, 1 - intensity, y_eq, intensity, 0)
+            ycrcb_eq = cv2.merge((y_blend.astype(np.uint8), cr, cb))
             equalized_bgr = cv2.cvtColor(ycrcb_eq, cv2.COLOR_YCrCb2BGR)
 
         cv2.imwrite(output_path, equalized_bgr)
@@ -187,7 +164,8 @@ def index():
             file.save(input_path)
 
             grayscale = request.form.get('grayscale') == 'yes'
-            equalize_histogram(input_path, output_path, grayscale)
+            intensity = float(request.form.get('intensity', '100')) / 100.0
+            equalize_histogram(input_path, output_path, grayscale, intensity)
 
             return render_template_string(RESULT_HTML, filename=filename, css=CSS_STYLE)
 
