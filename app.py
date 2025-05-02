@@ -70,9 +70,14 @@ INDEX_HTML = """
     <style>{{ css }}</style>
 </head>
 <body>
-    <h1>🧪 Image Histogram Equalization</h1>
+    <h1>🧪 Image Enhancer</h1>
     <form method="post" enctype="multipart/form-data">
         <input type="file" name="image" required><br>
+        <label for="mode">Enhancement Mode</label>
+        <select name="mode">
+            <option value="equalize">Histogram Equalization</option>
+            <option value="sharpen">Sharpen Image</option>
+        </select><br>
         <label for="grayscale">Convert to Grayscale?</label>
         <select name="grayscale">
             <option value="no">No</option>
@@ -117,33 +122,41 @@ RESULT_HTML = """
 </html>
 """
 
-# IMAGE PROCESSING (Histogram Equalization with Intensity Control)
+# IMAGE PROCESSING
+
 def equalize_histogram(input_path, output_path, grayscale=False, intensity=1.0):
-    try:
-        image = cv2.imread(input_path)
+    image = cv2.imread(input_path)
+    if image is None:
+        raise ValueError(f"Failed to load image from {input_path}")
 
-        if image is None:
-            raise ValueError(f"Failed to load image from {input_path}")
+    if grayscale:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        equalized = cv2.equalizeHist(gray)
+        result = cv2.cvtColor(equalized, cv2.COLOR_GRAY2BGR)
+    else:
+        ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+        y, cr, cb = cv2.split(ycrcb)
+        y_eq = cv2.equalizeHist(y)
+        y_blend = cv2.addWeighted(y, 1 - intensity, y_eq, intensity, 0)
+        ycrcb_eq = cv2.merge((y_blend.astype(np.uint8), cr, cb))
+        result = cv2.cvtColor(ycrcb_eq, cv2.COLOR_YCrCb2BGR)
 
-        if grayscale:
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            equalized = cv2.equalizeHist(gray)
-            equalized_bgr = cv2.cvtColor(equalized, cv2.COLOR_GRAY2BGR)
-        else:
-            ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
-            y, cr, cb = cv2.split(ycrcb)
-            y_eq = cv2.equalizeHist(y)
-            y_blend = cv2.addWeighted(y, 1 - intensity, y_eq, intensity, 0)
-            ycrcb_eq = cv2.merge((y_blend.astype(np.uint8), cr, cb))
-            equalized_bgr = cv2.cvtColor(ycrcb_eq, cv2.COLOR_YCrCb2BGR)
+    cv2.imwrite(output_path, result)
 
-        cv2.imwrite(output_path, equalized_bgr)
+def sharpen_image(input_path, output_path, grayscale=False, intensity=1.0):
+    image = cv2.imread(input_path)
+    if image is None:
+        raise ValueError(f"Failed to load image from {input_path}")
 
-    except Exception as e:
-        print(f"Error processing image: {str(e)}")
-        if os.path.exists(input_path):
-            import shutil
-            shutil.copy(input_path, output_path)
+    if grayscale:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    sharpened = cv2.filter2D(image, -1, kernel)
+    output = cv2.addWeighted(image, 1 - intensity, sharpened, intensity, 0)
+
+    cv2.imwrite(output_path, output)
 
 # ROUTES
 @app.route('/', methods=['GET', 'POST'])
@@ -153,7 +166,6 @@ def index():
             return redirect(request.url)
 
         file = request.files['image']
-
         if file.filename == '':
             return redirect(request.url)
 
@@ -165,7 +177,12 @@ def index():
 
             grayscale = request.form.get('grayscale') == 'yes'
             intensity = float(request.form.get('intensity', '100')) / 100.0
-            equalize_histogram(input_path, output_path, grayscale, intensity)
+            mode = request.form.get('mode', 'equalize')
+
+            if mode == 'sharpen':
+                sharpen_image(input_path, output_path, grayscale, intensity)
+            else:
+                equalize_histogram(input_path, output_path, grayscale, intensity)
 
             return render_template_string(RESULT_HTML, filename=filename, css=CSS_STYLE)
 
