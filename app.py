@@ -12,192 +12,541 @@ app.config['PROCESSED_FOLDER'] = 'processed'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
 
-# CSS_STYLE (original orange theme with slider styling)
+# ========== CSS ==========
 CSS_STYLE = """
 body {
-    font-family: Arial, sans-serif;
-    background-color: #fff7f0;
-    color: #333;
-    padding: 20px;
-    text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.container {
+  background: white;
+  width: 90%;
+  max-width: 1000px;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  text-align: center;
 }
 h1 {
-    color: #FF5733;
+  color: #333;
+  margin-bottom: 30px;
+  font-weight: 700;
+  font-size: 2.2rem;
 }
-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    display: inline-block;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  padding: 30px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-input[type="file"], select, input[type="range"] {
-    margin: 10px 0;
-    padding: 10px;
-    width: 100%;
-    max-width: 300px;
+.upload-area:hover {
+  border-color: #4285f4;
+  background-color: #f8f9fa;
 }
-input[type="submit"] {
-    background-color: #C70039;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.upload-icon {
+  font-size: 48px;
+  color: #4285f4;
+  margin-bottom: 10px;
 }
-input[type="submit"]:hover {
-    background-color: #900C3F;
+input[type="file"] {
+  display: none;
+}
+.control-panel {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+.button {
+  padding: 12px 24px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin: 10px 5px;
+}
+.button:hover {
+  background: #3367d6;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.button.download {
+  background: #34a853;
+}
+.button.download:hover {
+  background: #2d9249;
+}
+.slider-container {
+  margin: 20px 0;
+  text-align: left;
+}
+.slider-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+.slider {
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+  -webkit-appearance: none;
+  background: #ddd;
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4285f4;
+  cursor: pointer;
+}
+.image-container {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.image-wrapper {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.image-box {
+  margin: 10px;
+  text-align: center;
+}
+.image-box h3 {
+  margin-bottom: 10px;
+  color: #555;
 }
 img {
-    margin: 20px;
-    max-width: 90%;
-    height: auto;
-    border-radius: 10px;
-    border: 2px solid #FF5733;
+  max-width: 350px;
+  max-height: 350px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
 }
-.slider-label {
-    margin-top: 10px;
-    font-weight: bold;
+img:hover {
+  transform: scale(1.03);
+}
+.back-link {
+  display: block;
+  margin-top: 20px;
+  color: #4285f4;
+  text-decoration: none;
+  font-weight: 600;
+}
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 15px 0;
+  padding: 5px;
+}
+.checkbox-container input[type="checkbox"] {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.checkbox-container label {
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+}
+.twentytwenty-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+.twentytwenty-container img {
+  width: 100%;
+  display: block;
+}
+hr {
+  margin: 40px 0; 
+  border: 0; 
+  border-top: 1px solid #ccc;
+}
+.comparison-slider {
+  width: 100%;
+  max-width: 700px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  margin: 20px auto;
+}
+.mode-selector {
+  margin: 15px 0;
+  text-align: left;
+}
+.mode-selector label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+.mode-selector select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: white;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+}
+.mode-selector select:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
 }
 """
 
-# INDEX_HTML
+# ========== INDEX HTML ==========
 INDEX_HTML = """
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Image Enhancer</title>
-    <style>{{ css }}</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Image Enhancer</title>
+  <style>{{ css }}</style>
 </head>
 <body>
-    <h1>🧪 Image Enhancer</h1>
-    <form method="post" enctype="multipart/form-data">
-        <input type="file" name="image" required><br>
-        <label for="mode">Enhancement Mode</label>
-        <select name="mode">
-            <option value="equalize">Histogram Equalization</option>
+  <div class="container">
+    <h1>🔍 Professional Image Enhancer</h1>
+    <form id="upload-form" action="/" method="POST" enctype="multipart/form-data">
+      <div class="upload-area" id="drop-area" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📁</div>
+        <p>Click to select or drag and drop an image</p>
+      </div>
+      <input type="file" id="file-input" name="image" accept="image/*" required>
+      <div class="control-panel">
+        <div class="mode-selector">
+          <label for="mode">Enhancement Mode:</label>
+          <select id="mode" name="mode">
             <option value="sharpen">Sharpen Image</option>
-        </select><br>
-        <label for="grayscale">Convert to Grayscale?</label>
-        <select name="grayscale">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-        </select><br>
-        <div class="slider-label">Intensity:</div>
-        <input type="range" min="1" max="100" value="100" name="intensity" id="intensitySlider">
-        <div id="intensityValue">100%</div>
-        <script>
-            const slider = document.getElementById('intensitySlider');
-            const output = document.getElementById('intensityValue');
-            slider.oninput = function() {
-                output.innerHTML = this.value + '%';
-            }
-        </script>
-        <br><br>
-        <input type="submit" value="Enhance">
+            <option value="equalize">Histogram Equalization</option>
+          </select>
+        </div>
+        <div class="slider-container">
+          <label for="intensity">Enhancement Intensity: <span id="intensity-value">5</span></label>
+          <input type="range" id="intensity" name="intensity" class="slider" min="1" max="10" value="5">
+        </div>
+        <div class="checkbox-container">
+          <input type="checkbox" id="grayscale" name="grayscale" value="yes">
+          <label for="grayscale">Convert to Grayscale</label>
+        </div>
+        <button type="submit" class="button">Upload & Enhance</button>
+      </div>
     </form>
+  </div>
+  <script>
+    const intensitySlider = document.getElementById('intensity');
+    const intensityValue = document.getElementById('intensity-value');
+    intensitySlider.addEventListener('input', function() {
+      intensityValue.textContent = this.value;
+    });
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    function highlight() {
+      dropArea.style.borderColor = '#4285f4';
+      dropArea.style.backgroundColor = '#f0f7ff';
+    }
+    function unhighlight() {
+      dropArea.style.borderColor = '#ccc';
+      dropArea.style.backgroundColor = 'transparent';
+    }
+    dropArea.addEventListener('drop', handleDrop, false);
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length) {
+        fileInput.files = files;
+      }
+    }
+  </script>
 </body>
 </html>
 """
 
-# RESULT_HTML
+# ========== RESULT HTML ==========
 RESULT_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Result</title>
+    <title>Enhanced Result</title>
+    <meta charset="UTF-8">
     <style>{{ css }}</style>
+
+    <!-- jQuery + twentytwenty -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twentytwenty/1.0.0/css/twentytwenty.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.event.move/2.0.0/jquery.event.move.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twentytwenty/1.0.0/js/jquery.twentytwenty.js"></script>
 </head>
 <body>
-    <h1>✅ Result</h1>
-    <h3>Original Image</h3>
-    <img src="{{ url_for('uploaded_file', filename=filename) }}">
-    <h3>Enhanced Image</h3>
-    <img src="{{ url_for('processed_file', filename=filename) }}">
-    <br><br>
-    <a href="{{ url_for('download_file', filename=filename) }}">Download Image</a>
-    <br><br>
-    <a href="{{ url_for('index') }}">🔙 Back</a>
+    <div class="container">
+        <h1>✨ Enhanced Result</h1>
+        
+        <hr>
+
+        <div class="image-container">
+            <h3>🖼️ Side by Side View</h3>
+            <div class="image-wrapper">
+                <div class="image-box">
+                    <h3>Original</h3>
+                    <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Original Image">
+                </div>
+                <div class="image-box">
+                    <h3>Enhanced ({{ mode }})</h3>
+                    <img src="{{ url_for('processed_file', filename=filename) }}" alt="Enhanced Image">
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{{ url_for('download_file', filename=filename) }}" class="button download">⬇️ Download Enhanced</a>
+                <a href="{{ url_for('index') }}" class="button">⏪ Process Another Image</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      $(function(){
+        $(".twentytwenty-container").twentytwenty({
+          default_offset_pct: 0.5
+        });
+      });
+    </script>
 </body>
 </html>
 """
 
-# IMAGE PROCESSING
+# ========== IMAGE PROCESSING ==========
+def sharpen_image(input_path, output_path, intensity=5, grayscale=False):
+    """
+    Apply sharpening filter to image with improved algorithm
+    
+    Parameters:
+    - input_path: Path to the input image
+    - output_path: Path to save the processed image
+    - intensity: Sharpening intensity (1-10)
+    - grayscale: Whether to convert to grayscale
+    """
+    try:
+        # Read the image
+        image = cv2.imread(input_path)
+        
+        if image is None:
+            raise ValueError(f"Failed to load image from {input_path}")
+        
+        # Keep a copy of the original for blending
+        original = image.copy()
+        
+        # Convert to grayscale if requested
+        if grayscale:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            # Convert back to BGR so we can save as color (but still grayscale)
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+            original = image.copy()  # Update original to grayscale version
+        
+        # Method 1: Unsharp Mask - more effective than simple kernel
+        # Create a blurred version of the image
+        gaussian = cv2.GaussianBlur(image, (0, 0), 2)
+        
+        # Calculate the unsharp mask by subtracting the blurred image
+        unsharp_mask = cv2.addWeighted(image, 1.5, gaussian, -0.5, 0)
+        
+        # Method 2: Use Laplacian for edge detection
+        laplacian = cv2.Laplacian(image, cv2.CV_8U)
+        
+        # Convert to float for math operations
+        image_float = image.astype(np.float32)
+        laplacian_float = laplacian.astype(np.float32)
+        
+        # Apply intensity factor to Laplacian (edge emphasis)
+        intensity_factor = intensity * 0.4  # Scale the intensity for better control
+        sharpened = image_float + intensity_factor * laplacian_float
+        
+        # Clip values to valid range [0, 255]
+        sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
+        
+        # For high intensity, blend with unsharp mask for extra sharpness
+        if intensity > 3:
+            blend_ratio = (intensity - 3) / 7.0  # 0 to 1 for intensity 3-10
+            sharpened = cv2.addWeighted(sharpened, 1.0 - blend_ratio, unsharp_mask, blend_ratio, 0)
+        
+        # Save the processed image
+        cv2.imwrite(output_path, sharpened)
+        
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        # If processing fails, copy the original to the output
+        if os.path.exists(input_path):
+            import shutil
+            shutil.copy(input_path, output_path)
 
-def equalize_histogram(input_path, output_path, grayscale=False, intensity=1.0):
-    image = cv2.imread(input_path)
-    if image is None:
-        raise ValueError(f"Failed to load image from {input_path}")
+def equalize_histogram(input_path, output_path, intensity=5, grayscale=False):
+    """
+    Apply histogram equalization to an image
+    
+    Parameters:
+    - input_path: Path to the input image
+    - output_path: Path to save the processed image
+    - intensity: Equalization intensity (1-10)
+    - grayscale: Whether to convert to grayscale
+    """
+    try:
+        # Read the image
+        image = cv2.imread(input_path)
+        
+        if image is None:
+            raise ValueError(f"Failed to load image from {input_path}")
+        
+        # Convert intensity from 1-10 range to 0.1-1.0 range for blending
+        blend_intensity = intensity / 10.0
+        
+        if grayscale:
+            # Convert to grayscale
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            
+            # Apply histogram equalization
+            equalized = cv2.equalizeHist(gray)
+            
+            # Blend original and equalized based on intensity
+            if intensity < 10:
+                blended = cv2.addWeighted(gray, 1.0 - blend_intensity, equalized, blend_intensity, 0)
+                result = cv2.cvtColor(blended, cv2.COLOR_GRAY2BGR)
+            else:
+                result = cv2.cvtColor(equalized, cv2.COLOR_GRAY2BGR)
+        else:
+            # For color images, convert to YCrCb color space and equalize Y channel
+            ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+            y, cr, cb = cv2.split(ycrcb)
+            
+            # Apply histogram equalization to Y channel
+            y_eq = cv2.equalizeHist(y)
+            
+            # Blend original and equalized Y channel based on intensity
+            if intensity < 10:
+                y_blend = cv2.addWeighted(y, 1.0 - blend_intensity, y_eq, blend_intensity, 0)
+            else:
+                y_blend = y_eq
+            
+            # Merge channels back
+            ycrcb_eq = cv2.merge((y_blend, cr, cb))
+            
+            # Convert back to BGR color space
+            result = cv2.cvtColor(ycrcb_eq, cv2.COLOR_YCrCb2BGR)
+        
+        # Save the processed image
+        cv2.imwrite(output_path, result)
+        
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        # If processing fails, copy the original to the output
+        if os.path.exists(input_path):
+            import shutil
+            shutil.copy(input_path, output_path)
 
-    if grayscale:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        equalized = cv2.equalizeHist(gray)
-        result = cv2.cvtColor(equalized, cv2.COLOR_GRAY2BGR)
-    else:
-        ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
-        y, cr, cb = cv2.split(ycrcb)
-        y_eq = cv2.equalizeHist(y)
-        y_blend = cv2.addWeighted(y, 1 - intensity, y_eq, intensity, 0)
-        ycrcb_eq = cv2.merge((y_blend.astype(np.uint8), cr, cb))
-        result = cv2.cvtColor(ycrcb_eq, cv2.COLOR_YCrCb2BGR)
-
-    cv2.imwrite(output_path, result)
-
-def sharpen_image(input_path, output_path, grayscale=False, intensity=1.0):
-    image = cv2.imread(input_path)
-    if image is None:
-        raise ValueError(f"Failed to load image from {input_path}")
-
-    if grayscale:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-
-    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-    sharpened = cv2.filter2D(image, -1, kernel)
-    output = cv2.addWeighted(image, 1 - intensity, sharpened, intensity, 0)
-
-    cv2.imwrite(output_path, output)
-
-# ROUTES
+# ========== ROUTES ==========
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        # Check if image file was uploaded
         if 'image' not in request.files:
             return redirect(request.url)
-
+        
         file = request.files['image']
+        
+        # If user doesn't select a file, browser submits an empty file
         if file.filename == '':
             return redirect(request.url)
-
+        
+        # Process the image if it exists
         if file:
+            # Secure the filename to prevent directory traversal attacks
             filename = secure_filename(file.filename)
+            
+            # Define file paths
             input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             output_path = os.path.join(app.config['PROCESSED_FOLDER'], filename)
+            
+            # Save the uploaded file
             file.save(input_path)
-
+            
+            # Get image processing parameters
+            intensity = int(request.form.get('intensity', 5))
             grayscale = request.form.get('grayscale') == 'yes'
-            intensity = float(request.form.get('intensity', '100')) / 100.0
-            mode = request.form.get('mode', 'equalize')
-
+            mode = request.form.get('mode', 'sharpen')
+            
+            # Process the image based on selected mode
             if mode == 'sharpen':
-                sharpen_image(input_path, output_path, grayscale, intensity)
-            else:
-                equalize_histogram(input_path, output_path, grayscale, intensity)
-
-            return render_template_string(RESULT_HTML, filename=filename, css=CSS_STYLE)
-
+                sharpen_image(input_path, output_path, intensity, grayscale)
+            else:  # equalize
+                equalize_histogram(input_path, output_path, intensity, grayscale)
+            
+            # Render the result page
+            return render_template_string(RESULT_HTML, filename=filename, mode=mode, css=CSS_STYLE)
+    
+    # Render the index page for GET requests
     return render_template_string(INDEX_HTML, css=CSS_STYLE)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    """Serve original uploaded files"""
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/processed/<filename>')
 def processed_file(filename):
+    """Serve processed files"""
     return send_from_directory(app.config['PROCESSED_FOLDER'], filename)
 
 @app.route('/download/<filename>')
 def download_file(filename):
+    """Download processed files as attachments"""
     return send_from_directory(app.config['PROCESSED_FOLDER'], filename, as_attachment=True)
 
 if __name__ == '__main__':
